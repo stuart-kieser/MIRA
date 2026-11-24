@@ -53,7 +53,7 @@ export const demoProjects: SpaceProject[] = [
 
 export const captureTips = [
   'Move slowly and keep the camera steady',
-  'Walk around each room in a full loop',
-  'Keep lights on and avoid moving people',
-  'Aim for 2–5 minutes per room',
+  'Circle the object or follow an overlapping path through the scene',
+  'Use even lighting and avoid moving subjects',
+  'Film important details from more than one angle',
 ]

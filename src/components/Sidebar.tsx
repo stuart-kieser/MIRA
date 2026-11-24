@@ -22,7 +22,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: 'spaces' as const, label: 'My spaces', icon: LayoutGrid },
+  { id: 'spaces' as const, label: 'My scans', icon: LayoutGrid },
   { id: 'captures' as const, label: 'How to capture', icon: Aperture },
   { id: 'shared' as const, label: 'Shared with me', icon: Users },
   { id: 'billing' as const, label: 'Usage & billing', icon: BadgeDollarSign },

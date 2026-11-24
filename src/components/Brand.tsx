@@ -17,8 +17,8 @@ export function Brand({ style = "simple" }: BrandProps) {
   }
 
   return (
-    <div className="brand" aria-label="Mira home">
-      <img src={logo} className="brand-logo" />
+    <div className="brand">
+      <img src={logo} className={style === "simple" ? "brand-logo brand-wordmark" : "brand-logo"} alt="Mira" />
     </div>
   );
 }

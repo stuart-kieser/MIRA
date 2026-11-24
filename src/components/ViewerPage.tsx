@@ -185,7 +185,6 @@ export function ViewerPage({ project, onBack }: ViewerPageProps) {
           <div className="scene-stats">
             <div><span><Eye size={16} /> Splats</span><strong>{project.splatCount || 'Preview'}</strong></div>
             <div><span><Gauge size={16} /> Build time</span><strong>{project.processingMinutes ? `${project.processingMinutes} min` : 'Imported'}</strong></div>
-            <div><span><Home size={16} /> Rooms</span><strong>{project.rooms}</strong></div>
           </div>
           <div className="scene-file-block">
             <span>SOURCE</span>

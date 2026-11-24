@@ -192,7 +192,7 @@ el('upload').addEventListener('submit', async (event) => {
   event.preventDefault()
   const file = el<HTMLInputElement>('video').files?.[0]
   if (!file || !connected) return
-  if (file.size > 3 * 1024 ** 3) { error('Choose a video smaller than 3 GB.'); return }
+  if (file.size > 3 * 1024 ** 3) { error('Choose a capture no larger than 3 GB.'); return }
   const form = new FormData()
   form.append('video', file)
   form.append('name', el<HTMLInputElement>('name').value.trim())
@@ -204,7 +204,7 @@ el('upload').addEventListener('submit', async (event) => {
     form.append('downscale_factor', el<HTMLSelectElement>('downscale').value)
   }
   el<HTMLButtonElement>('start').disabled = true
-  text('start', 'Uploading video…')
+  text('start', 'Uploading capture…')
   error()
   try {
     const job: Job = await (await request('/v1/reconstructions', { method: 'POST', body: form })).json()

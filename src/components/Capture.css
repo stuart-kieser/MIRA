@@ -1,0 +1,91 @@
+.capture-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.capture-panel p {
+  margin: 0;
+}
+
+.capture-open-button {
+  margin-top: 14px;
+}
+
+.capture-monitor,
+.capture-playback {
+  width: 100%;
+  max-height: 52dvh;
+  border-radius: 16px;
+  background: var(--viewer-night);
+  color: #eef5ff;
+}
+
+.capture-monitor {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  overflow: hidden;
+}
+
+.capture-monitor video {
+  width: 100%;
+  max-height: 52dvh;
+}
+
+.capture-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.capture-controls a {
+  text-decoration: none;
+}
+
+.capture-panel .secondary-button,
+.capture-open-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.capture-panel .secondary-button:hover,
+.capture-open-button:hover {
+  background: #eef5ff;
+}
+
+.capture-panel button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.capture-xr-overlay {
+  display: none;
+}
+
+.capture-xr-overlay:xr-overlay {
+  display: block;
+  pointer-events: none;
+}
+
+.capture-xr-controls {
+  position: absolute;
+  inset: auto 16px max(20px, env(safe-area-inset-bottom)) 16px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #0b1d38ea;
+  color: #eef5ff;
+  pointer-events: auto;
+}

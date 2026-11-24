@@ -12,7 +12,7 @@ async function register(page: Page) {
   await page.locator('.terms-check input').check()
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page).toHaveURL(/\/app$/)
-  await expect(page.getByRole('heading', { name: 'Good morning, Amina.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Welcome, Amina.' })).toBeVisible()
   return email
 }
 
@@ -35,7 +35,10 @@ async function signInOrRegisterAdmin(page: Page, email: string) {
 
 test('public website explains the product and pay-per-scan model', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Turn a walkthrough into a living digital space.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Reconstruct the real world in 3D.' })).toBeVisible()
+  await expect(page.getByRole('list', { name: 'What you can capture' })).toContainText('Objects')
+  await expect(page.getByRole('list', { name: 'What you can capture' })).toContainText('Outdoor scenes')
+  await expect(page.getByRole('list', { name: 'What you can capture' })).toContainText('Interiors')
   await expect(page.getByText('Your first scene is on us.')).toBeVisible()
   await expect(page.getByText(/simple pay-per-scan/i)).toBeVisible()
   await page.getByRole('link', { name: 'Create your free scan' }).click()
@@ -55,7 +58,7 @@ test('registers a user and protects the private workspace', async ({ page }) => 
   await page.goto('/app')
   await expect(page).toHaveURL(/\/login$/)
   await register(page)
-  await expect(page.getByText('Your first space starts with a walkthrough')).toBeVisible()
+  await expect(page.getByText('Your first scan starts with a phone video')).toBeVisible()
   await page.getByRole('button', { name: 'Usage & billing' }).click()
   await expect(page.getByRole('heading', { name: 'Usage & billing' })).toBeVisible()
   await expect(page.getByRole('button', { name: /Order .* credit by EFT/ })).toHaveCount(5)
@@ -64,10 +67,10 @@ test('registers a user and protects the private workspace', async ({ page }) => 
   await expect(page.getByRole('heading', { name: 'Balanced' }).locator('xpath=ancestor::article')).toContainText('0 owned')
   await page.getByRole('button', { name: 'Settings' }).click()
   await expect(page.getByRole('heading', { name: 'Account settings' })).toBeVisible()
-  await page.getByRole('button', { name: 'My spaces' }).click()
+  await page.getByRole('button', { name: 'My scans' }).click()
   const newCapture = page.getByRole('button', { name: 'New capture' })
   if (await newCapture.count()) await newCapture.first().click()
-  else await page.getByRole('button', { name: /Capture your first space/ }).click()
+  else await page.getByRole('button', { name: /Start a new scan/ }).click()
   await page.locator('input[type="file"]').setInputFiles({
     name: 'sunset-flat.mp4',
     mimeType: 'video/mp4',
@@ -90,7 +93,7 @@ test('registers a user and protects the private workspace', async ({ page }) => 
   await expect(page.getByText('4× downscale', { exact: false })).toBeVisible()
   await expect(page.getByText('Maximum billing tier')).toBeVisible()
   await expect(page.getByText('Your free scan', { exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Start building my space' })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Submit scan' })).toBeEnabled()
   const deniedRequest = page.waitForResponse((response) => response.url().endsWith('/api/admin/me'))
   await page.goto('/admin')
   await expect((await deniedRequest).status()).toBe(403)
@@ -134,11 +137,11 @@ test('customer and administrator complete the EFT and manual order screens', asy
   await page.getByRole('button', { name: 'Usage & billing' }).click()
   await page.getByRole('button', { name: 'Order Balanced credit by EFT' }).click()
   await expect(page.getByText(/EFT order created/)).toBeVisible()
-  await page.getByRole('button', { name: 'My spaces' }).click()
-  await page.getByRole('button', { name: /Capture your first space/ }).click()
+  await page.getByRole('button', { name: 'My scans' }).click()
+  await page.getByRole('button', { name: /Start a new scan/ }).click()
   await page.locator('input[type="file"]').setInputFiles({ name: 'customer-video.mp4', mimeType: 'video/mp4', buffer: Buffer.from('customer source video') })
-  await page.getByLabel(/Space name/).fill(name)
-  await page.getByRole('button', { name: 'Start building my space' }).click()
+  await page.getByLabel(/Scan name/).fill(name)
+  await page.getByRole('button', { name: 'Submit scan' }).click()
   await expect(page.getByText('Submitted - awaiting processing')).toBeVisible()
 
   const adminContext = await browser.newContext()

@@ -85,7 +85,7 @@ export function ProjectCard({ project, onOpen, onDelete, onViewMetrics }: Projec
           {menuOpen && (
             <div className="popover-menu">
               <button onClick={() => onOpen(project)} disabled={!isReady}>
-                <Rotate3D size={15} /> Open space
+                <Rotate3D size={15} /> Open scan
               </button>
               <button className="danger" onClick={() => onDelete(project.id)}>
                 <Trash2 size={15} /> Delete
@@ -122,9 +122,7 @@ export function ProjectCard({ project, onOpen, onDelete, onViewMetrics }: Projec
             <button className="metrics-report-button" onClick={() => onViewMetrics(project)}>
               <Activity size={13} /> Build report
             </button>
-          ) : (
-            <span>{project.rooms} {project.rooms === 1 ? 'room' : 'rooms'}</span>
-          )}
+          ) : null}
         </div>
       )}
     </article>

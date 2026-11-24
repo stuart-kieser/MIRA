@@ -20,12 +20,14 @@ import uuid
 from collections import deque
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any, Callable, Literal
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from worker.tracked_capture import triangulate_capture, unpack_capture
 
 
 JobStatus = Literal["queued", "processing", "completed", "failed"]
@@ -44,7 +46,7 @@ MAX_CUSTOM_TRAIN_STEPS = 15_000
 CUSTOM_DOWNSCALE_FACTORS = {1, 2, 4, 8}
 METRICS_POLL_SECONDS = max(1.0, min(60.0, float(os.environ.get("MIRA_METRICS_POLL_SECONDS", "5"))))
 TRAIN_LOG_SAMPLES = max(30, min(300, int(os.environ.get("MIRA_TRAIN_LOG_SAMPLES", "100"))))
-ALLOWED_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm"}
+ALLOWED_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm", ".miracapture"}
 GATEWAY_TOKEN = os.environ.get("MIRA_GATEWAY_TOKEN", "").strip()
 ANSI_ESCAPE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 TRAIN_STEP = re.compile(r"^\s*(\d+)\s+\((\d+(?:\.\d+)?)%\)")
@@ -653,19 +655,38 @@ def run_pipeline(job_id: str, video_path: Path) -> None:
         profile = effective_profile(job)
     try:
         update_job(job_id, status="processing", progress=12, stage="Finding camera positions")
-        run_command(
-            [
-                "ns-process-data",
-                "video",
-                "--data",
-                str(video_path),
-                "--output-dir",
-                str(processed_dir),
-                "--num-frames-target",
-                str(profile.num_frames_target),
-            ],
-            job_dir,
-        )
+        if video_path.suffix == ".miracapture":
+            with TemporaryDirectory(dir=job_dir) as directory:
+                root = Path(directory)
+                images = root / "frames"
+                prepared = root / "prepared"
+                width, height, frames = unpack_capture(video_path, images, profile.num_frames_target)
+                update_job(job_id, stage="Triangulating tracked camera frames")
+                try:
+                    triangulate_capture(images, prepared, width, height, frames, profile.downscale_factor, run_command)
+                except Exception as error:
+                    print(f"Tracked reconstruction for {job_id} fell back to image alignment: {error}", flush=True)
+                    update_job(job_id, stage="Refining camera alignment from images")
+                    run_command(
+                        ["ns-process-data", "images", "--data", str(images), "--output-dir", str(processed_dir)],
+                        job_dir,
+                    )
+                else:
+                    prepared.rename(processed_dir)
+        else:
+            run_command(
+                [
+                    "ns-process-data",
+                    "video",
+                    "--data",
+                    str(video_path),
+                    "--output-dir",
+                    str(processed_dir),
+                    "--num-frames-target",
+                    str(profile.num_frames_target),
+                ],
+                job_dir,
+            )
 
         metrics = analyse_capture(processed_dir, select_best=True)
         metrics.training_iterations = profile.train_steps
@@ -906,7 +927,7 @@ async def create_reconstruction(
 ) -> dict[str, object]:
     extension = Path(video.filename or "").suffix.lower()
     if extension not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=415, detail="Upload an MP4, MOV, M4V, or WebM walkthrough.")
+        raise HTTPException(status_code=415, detail="Upload a supported video or MIRA tracked capture.")
 
     tuning_values = (target_frames, train_steps, downscale_factor)
     custom_tuning = any(value is not None for value in tuning_values)

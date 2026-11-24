@@ -16,7 +16,7 @@ export function OrderActions({ scan, onUpdated }: { scan: AdminScan; onUpdated: 
   }
   return <div className="order-actions">
     <small>Order {scan.id}</small>
-    {scan.source_filename ? <a href={`/api/admin/scans/${scan.id}/source`}>Download video · {scan.source_filename}</a> : <small>Legacy order: source remains on the original worker.</small>}
+    {scan.source_filename ? <a href={`/api/admin/scans/${scan.id}/source`}>Download {scan.source_filename.endsWith('.miracapture') ? 'tracked capture' : 'video'} · {scan.source_filename}</a> : <small>Legacy order: source remains on the original worker.</small>}
     {scan.has_model && <a href={`/api/admin/scans/${scan.id}/model`}>Download finished splat</a>}
     {active && <>
       {scan.status !== 'processing' && <button disabled={busy} onClick={() => void run(() => adminApi.scanStatus(scan.id, 'processing'))}>Mark processing</button>}

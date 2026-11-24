@@ -194,8 +194,8 @@ export function SpatialCanvas({
     let splat: SplatMesh | undefined
     let spark: SparkRenderer | undefined
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#151713')
-    scene.fog = new THREE.FogExp2('#151713', 0.018)
+    scene.background = new THREE.Color('#08172d')
+    scene.fog = new THREE.FogExp2('#08172d', 0.018)
 
     const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true })
     renderer.outputColorSpace = THREE.SRGBColorSpace

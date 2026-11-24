@@ -3,12 +3,13 @@ import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { authClient } from '../auth-client'
 import { Brand } from './Brand'
+import { SplatArtwork } from './SplatArtwork'
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset'
 
 const copy: Record<AuthMode, { eyebrow: string; title: string; description: string }> = {
-  login: { eyebrow: 'WELCOME BACK', title: 'Step back into your spaces.', description: 'Sign in to manage scans, view progress, and explore finished scenes.' },
-  register: { eyebrow: 'YOUR FIRST SCAN IS FREE', title: 'Create your Mira account.', description: 'Start building explorable spaces from ordinary phone walkthroughs.' },
+  login: { eyebrow: 'WELCOME BACK', title: 'Sign in to Mira.', description: 'Manage your scans, check progress, and explore finished scenes.' },
+  register: { eyebrow: 'YOUR FIRST SCAN IS FREE', title: 'Create your Mira account.', description: 'Reconstruct objects and scenes in 3D from phone video.' },
   forgot: { eyebrow: 'ACCOUNT RECOVERY', title: 'Reset your password.', description: 'Enter your account email and we will send a secure reset link.' },
   reset: { eyebrow: 'CHOOSE A NEW PASSWORD', title: 'Secure your account.', description: 'Use at least 10 characters and avoid a password you use elsewhere.' },
 }
@@ -78,8 +79,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     <div className="auth-page">
       <aside className="auth-aside">
         <Link to="/"><Brand /></Link>
-        <div><span>A ROOM IS MORE THAN FOUR WALLS</span><blockquote>“Mira lets a place remain somewhere you can visit, not just something you remember.”</blockquote></div>
-        <small>Gaussian reconstruction, made approachable.</small>
+        <SplatArtwork />
       </aside>
       <main className="auth-main">
         <div className="auth-panel">

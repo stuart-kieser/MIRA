@@ -7,8 +7,9 @@ import { config, isQuality, qualityOrder } from './config.js'
 import { pool } from './database.js'
 import { PaymentRequiredError, reserveScan } from './entitlements.js'
 import { requireAuth } from './middleware.js'
+import { isTrackedCapture } from './tracked-capture.js'
 
-const upload = fileUpload(['mp4', 'mov', 'm4v', 'webm'], 3 * 1024 ** 3)
+const upload = fileUpload(['mp4', 'mov', 'm4v', 'webm', 'miracapture'], 3 * 1024 ** 3)
 
 const createLimiter = rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false })
 export const scansRouter = Router()
@@ -90,7 +91,7 @@ scansRouter.post('/scans', createLimiter, requireAuth, upload.single('video'), a
   let retained = false
   try {
     if (!file || !file.size) {
-      res.status(400).json({ error: 'Choose an MP4, MOV, M4V, or WebM walkthrough.' })
+      res.status(400).json({ error: 'Choose a supported video or MIRA tracked capture.' })
       return
     }
     const name = String(req.body.name || '').trim()
@@ -119,6 +120,10 @@ scansRouter.post('/scans', createLimiter, requireAuth, upload.single('video'), a
     const tuning = tuningResult?.data
     if (tuning && quality !== 'maximum') {
       res.status(400).json({ error: 'Advanced tuning uses the Maximum billing tier.' })
+      return
+    }
+    if (file.originalname.toLowerCase().endsWith('.miracapture') && !await isTrackedCapture(file.path, file.size)) {
+      res.status(400).json({ error: 'This MIRA tracked capture is incomplete or invalid.' })
       return
     }
 

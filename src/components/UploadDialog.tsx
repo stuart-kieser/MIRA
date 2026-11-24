@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BadgeDollarSign,
+  Camera,
   Check,
   FileBox,
   FileVideo2,
@@ -17,6 +18,7 @@ import { captureTips } from '../data'
 import { reconstructionApi } from '../services/reconstruction'
 import { billingApi, formatMoney, type ScanAccess } from '../services/api'
 import type { BuildMode, CaptureDraft } from '../types'
+import { Capture } from './Capture'
 
 interface UploadDialogProps {
   open: boolean
@@ -24,7 +26,7 @@ interface UploadDialogProps {
   onCreate: (draft: CaptureDraft) => void
 }
 
-const videoExtensions = ['mp4', 'mov', 'm4v', 'webm']
+const videoExtensions = ['mp4', 'mov', 'm4v', 'webm', 'miracapture']
 const modelExtensions = ['ply', 'splat', 'ksplat', 'spz', 'sog']
 const maxVideoSize = 3 * 1024 * 1024 * 1024
 const maxModelSize = 1.5 * 1024 * 1024 * 1024
@@ -38,6 +40,7 @@ const formatBytes = (bytes: number) => {
 
 export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
   const [kind, setKind] = useState<CaptureDraft['kind']>('walkthrough')
+  const [cameraOpen, setCameraOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
@@ -73,6 +76,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
 
   useEffect(() => {
     if (!open) {
+      setCameraOpen(false)
       setFile(null)
       setName('')
       setLocation('')
@@ -167,7 +171,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
   }
 
   const accept = kind === 'walkthrough'
-    ? '.mp4,.mov,.m4v,.webm,video/mp4,video/quicktime,video/webm'
+    ? '.mp4,.mov,.m4v,.webm,.miracapture,video/mp4,video/quicktime,video/webm'
     : '.ply,.splat,.ksplat,.spz,.sog'
   const buildModeIndex = Math.max(0, buildModeOptions.findIndex((mode) => mode.id === buildMode))
   const selectedBuildMode = buildModeOptions[buildModeIndex]
@@ -182,17 +186,21 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
       <section className="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-title">
         <div className="modal-topbar">
           <div>
-            <span className="modal-step">NEW DIGITAL SPACE</span>
-            <h2 id="upload-title">{file ? 'Name your space' : 'Bring a space to life'}</h2>
+            <h2 id="upload-title">{cameraOpen ? 'Record a video' : file ? 'Name your scan' : 'New 3D scan'}</h2>
           </div>
           <button className="icon-button" onClick={onClose} disabled={submitting} aria-label="Close"><X size={21} /></button>
         </div>
 
-        {!file ? (
+        {cameraOpen ? (
+          <Capture onBack={() => setCameraOpen(false)} onUse={(capture) => {
+            validateAndSet(capture)
+            setCameraOpen(false)
+          }} />
+        ) : !file ? (
           <>
             <div className="upload-tabs" role="tablist">
               <button className={kind === 'walkthrough' ? 'active' : ''} onClick={() => switchKind('walkthrough')}>
-                <FileVideo2 size={17} /> Phone walkthrough
+                <FileVideo2 size={17} /> Phone video
               </button>
               <button className={kind === 'model' ? 'active' : ''} onClick={() => switchKind('model')}>
                 <FileBox size={17} /> Finished splat
@@ -219,14 +227,20 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
                 hidden
               />
               <span className="drop-icon"><UploadCloud size={28} /></span>
-              <strong>{dragging ? 'Drop it here' : kind === 'walkthrough' ? 'Drop your walkthrough here' : 'Drop your Gaussian splat here'}</strong>
+              <strong>{dragging ? 'Drop it here' : kind === 'walkthrough' ? 'Drop your capture file here' : 'Drop your Gaussian splat here'}</strong>
               <p>or <u>choose a file</u> from your computer</p>
               <small>
                 {kind === 'walkthrough'
-                  ? 'MP4, MOV or WebM · Up to 3 GB · 2–15 minutes works best'
+                  ? 'MP4, MOV, WebM or MIRA capture · Up to 3 GB'
                   : 'PLY, SPZ, SPLAT, KSPLAT or SOG · Up to 1.5 GB'}
               </small>
             </button>
+
+            {kind === 'walkthrough' && (
+              <button className="secondary-button capture-open-button" onClick={() => setCameraOpen(true)}>
+                <Camera size={17} /> Open camera
+              </button>
+            )}
 
             {error && <div className="upload-error"><Info size={16} />{error}</div>}
 
@@ -252,8 +266,8 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
               <Check size={18} className="file-check" />
             </div>
             <label className="field-label">
-              Space name <span>Required</span>
-              <input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Kloof Street Loft" maxLength={60} />
+              Scan name <span>Required</span>
+              <input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Sandstone garden arch" maxLength={60} />
             </label>
             <label className="field-label">
               Location <span>Optional</span>
@@ -286,7 +300,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
                   aria-label="Build quality"
                   aria-valuetext={selectedBuildMode.name}
                   style={{
-                    background: `linear-gradient(to right, #d46440 0%, #d46440 ${buildQualityProgress}%, #d8d7cf ${buildQualityProgress}%, #d8d7cf 100%)`,
+                    background: `linear-gradient(to right, var(--blue) ${buildQualityProgress}%, var(--line) ${buildQualityProgress}%)`,
                   }}
                   onChange={(event) => {
                     const nextMode = buildModeOptions[Number(event.target.value)]
@@ -358,7 +372,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
                     ? supportedBuildModes === null
                       ? 'Checking available quality levels…'
                       : 'Could not check processing options. Close this dialog and try again.'
-                    : 'Your video will be submitted to our processing queue. Your finished space will appear here when it is ready.'
+                    : 'Your capture will enter the processing queue. Find the result in My scans when it’s ready.'
                   : 'The file stays in this browser for this prototype and opens directly in the spatial viewer.'}
               </p>
             </div>
@@ -367,7 +381,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
                 <BadgeDollarSign size={19} />
                 <div>
                   <strong>{scanAccess?.reason === 'development' ? 'Development build — no charge' : scanAccess?.reason === 'free' ? 'Your free scan' : scanAccess?.reason === 'credit' ? 'Paid credit ready' : scanAccess ? `${formatMoney(scanAccess.priceCents, scanAccess.currency)} for this ${billingLabel} scan` : 'Checking scan allowance…'}</strong>
-                  <p>{scanAccess?.allowed ? 'Your credit is deducted when your video is successfully submitted.' : scanAccess ? 'Order a credit by EFT in Usage & billing. You can submit once payment is confirmed.' : accessError || 'Confirming your account and selected quality.'}</p>
+                  <p>{scanAccess?.allowed ? 'Your credit is deducted when your capture is successfully submitted.' : scanAccess ? 'Order a credit by EFT in Usage & billing. You can submit once payment is confirmed.' : accessError || 'Confirming your account and selected quality.'}</p>
                 </div>
               </div>
             )}
@@ -379,7 +393,7 @@ export function UploadDialog({ open, onClose, onCreate }: UploadDialogProps) {
               </button>
             ) : (
               <button className="submit-capture" disabled={!name.trim() || submitting || (kind === 'walkthrough' && (!buildModeSupported || !advancedReady || !accessReady))} onClick={submit}>
-              {submitting ? <><LoaderCircle size={18} className="spin" /> Adding space…</> : kind === 'walkthrough' ? 'Start building my space' : 'Open in 3D viewer'}
+              {submitting ? <><LoaderCircle size={18} className="spin" /> Adding scan…</> : kind === 'walkthrough' ? 'Submit scan' : 'Open in 3D viewer'}
             </button>
             )}
             {accessError && <div className="upload-error"><Info size={16} />{accessError}</div>}

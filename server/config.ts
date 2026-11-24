@@ -11,7 +11,7 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().positive().default(3001),
   APP_URL: z.string().url().default('http://localhost:5173'),
   ADMIN_APP_URL: z.string().url().optional(),
-  DATABASE_URL: z.string().min(1).default('postgres://mira:mira@localhost:5433/mira'),
+  DATABASE_URL: z.string().min(1).default('postgres://mira@127.0.0.1:5432/mira'),
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
   RECONSTRUCTION_WORKER_URL: z.string().url().default('http://localhost:8787'),
   RECONSTRUCTION_WORKER_TOKEN: z.string().optional(),

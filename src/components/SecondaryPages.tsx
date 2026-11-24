@@ -29,7 +29,7 @@ export function SharedPage({ onCreate }: SharedPageProps) {
           <span className="page-kicker">COLLABORATION</span>
           <h1>Shared with me</h1>
           <p>
-            Spaces that friends, family, and teammates have invited you to
+            3D scans that friends, family, and teammates have invited you to
             explore.
           </p>
         </div>
@@ -42,20 +42,20 @@ export function SharedPage({ onCreate }: SharedPageProps) {
           <i />
           <i />
         </div>
-        <h2>No shared spaces yet</h2>
+        <h2>No shared scans yet</h2>
         <p>
-          When someone shares a Mira link with your email, their space will
+          When someone shares a Mira link with your email, their scan will
           appear here.
         </p>
         <button className="dark-button" onClick={onCreate}>
-          Create a space to share
+          Create a scan to share
         </button>
       </div>
       <div className="sharing-features">
         <div>
           <Link2 size={20} />
           <strong>One private link</strong>
-          <p>Share an explorable space without sending a huge file.</p>
+          <p>Share a 3D scan without sending a large file.</p>
         </div>
         <div>
           <Lock size={20} />

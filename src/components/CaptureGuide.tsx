@@ -1,33 +1,25 @@
-import { ArrowRight, Check, Lightbulb, Move3D, Smartphone, Sun, Video } from 'lucide-react'
+import { ArrowRight, Box, Building2, Lightbulb, Trees } from 'lucide-react'
+import { SplatArtwork } from './SplatArtwork'
 
 interface CaptureGuideProps {
   onStart: () => void
 }
 
-const steps = [
+const subjects = [
   {
-    number: '01',
-    icon: Sun,
-    title: 'Prepare the room',
-    copy: 'Open curtains, switch on the lights, and remove anything that moves in the breeze.',
+    icon: Box,
+    title: 'Objects',
+    copy: 'Keep the object still and walk around it. Make a second pass from higher up to capture the top and any details hidden in the first pass.',
   },
   {
-    number: '02',
-    icon: Video,
-    title: 'Start at the doorway',
-    copy: 'Hold your phone horizontally at chest height. Use the standard 1× camera—no cinematic mode.',
+    icon: Trees,
+    title: 'Outdoor scenes',
+    copy: 'Pick a bounded subject such as a garden, sculpture, or building exterior. Move along overlapping paths and work in even light when you can.',
   },
   {
-    number: '03',
-    icon: Move3D,
-    title: 'Make two slow loops',
-    copy: 'Walk the edge of each room, then make a smaller inner loop while keeping surfaces in view.',
-  },
-  {
-    number: '04',
-    icon: Check,
-    title: 'Connect every room',
-    copy: 'Keep recording as you cross doorways so Mira can understand how the spaces join together.',
+    icon: Building2,
+    title: 'Interiors',
+    copy: 'Walk slowly around each area. If you cover several rooms, keep recording as you pass through a doorway so the views connect.',
   },
 ]
 
@@ -37,42 +29,24 @@ export function CaptureGuide({ onStart }: CaptureGuideProps) {
       <header className="page-header guide-header">
         <div>
           <span className="page-kicker">CAPTURE GUIDE</span>
-          <h1>A better walkthrough makes a better space.</h1>
-          <p>Five quiet minutes with your phone is usually all you need.</p>
+          <h1>How to capture for 3D reconstruction</h1>
+          <p>Record an object, an outdoor scene, or an interior with your phone.</p>
         </div>
-        <button className="primary-button" onClick={onStart}>Upload a capture <ArrowRight size={17} /></button>
+        <button className="primary-button" onClick={onStart}>Start a capture <ArrowRight size={17} /></button>
       </header>
 
       <section className="guide-hero">
-        <div className="phone-demo">
-          <div className="phone-shell">
-            <div className="phone-speaker" />
-            <div className="phone-screen">
-              <div className="capture-room-lines"><i /><i /><i /><i /></div>
-              <div className="camera-grid"><i /><i /><i /><i /></div>
-              <div className="record-status"><i /> 02:14</div>
-              <div className="capture-direction">Move slowly around the room <span>→</span></div>
-              <div className="record-button"><i /></div>
-            </div>
-          </div>
-          <span className="phone-note note-one">Keep the phone level<i /></span>
-          <span className="phone-note note-two">Overlap each pass<i /></span>
-        </div>
+        <SplatArtwork className="guide-artwork" />
         <div className="guide-intro-copy">
-          <span><Smartphone size={18} /> ANY MODERN PHONE</span>
-          <h2>Think “slow tour,” not “property video.”</h2>
-          <p>
-            Gaussian splatting learns a place by seeing the same details from many angles.
-            Smooth, overlapping motion gives it the visual clues it needs to rebuild the room.
-          </p>
-          <div className="guide-callout"><Lightbulb size={20} /><p><strong>The golden rule</strong> If your movement feels almost too slow, it is probably just right.</p></div>
+          <h2>Move slowly and keep views overlapping.</h2>
+          <p>Use the main rear camera at 1× and hold it steady. Keep recognizable features in view as you move, so Mira can match those details from one frame to the next.</p>
+          <div className="guide-callout"><Lightbulb size={20} /><p><strong>Choose a still subject</strong> Avoid movement, glare, and abrupt changes in lighting.</p></div>
         </div>
       </section>
 
-      <section className="guide-steps">
-        {steps.map(({ number, icon: Icon, title, copy }) => (
-          <article key={number}>
-            <span className="step-number">{number}</span>
+      <section className="guide-steps" aria-label="Capture tips by subject">
+        {subjects.map(({ icon: Icon, title, copy }) => (
+          <article key={title}>
             <div className="step-icon"><Icon size={22} /></div>
             <h3>{title}</h3>
             <p>{copy}</p>
@@ -81,8 +55,8 @@ export function CaptureGuide({ onStart }: CaptureGuideProps) {
       </section>
 
       <section className="guide-footer-card">
-        <div><span>READY WHEN YOU ARE</span><h2>Already recorded your space?</h2><p>Upload it now. We’ll check the file before processing begins.</p></div>
-        <button className="dark-button" onClick={onStart}>Choose walkthrough <ArrowRight size={17} /></button>
+        <div><h2>Already have a video?</h2><p>Upload it and pick the reconstruction quality.</p></div>
+        <button className="dark-button" onClick={onStart}>Choose video <ArrowRight size={17} /></button>
       </section>
     </main>
   )

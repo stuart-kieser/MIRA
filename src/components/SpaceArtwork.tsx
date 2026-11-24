@@ -1,8 +1,8 @@
+import { Box } from 'lucide-react'
 import type { ProjectPalette } from '../types'
 
 interface SpaceArtworkProps {
   palette: ProjectPalette
-  variant?: 'card' | 'hero'
   processing?: boolean
 }
 
@@ -15,21 +15,11 @@ const dots = [
 
 export function SpaceArtwork({
   palette,
-  variant = 'card',
   processing = false,
 }: SpaceArtworkProps) {
   return (
-    <div className={`space-artwork palette-${palette} ${variant}`} aria-hidden="true">
-      <div className="art-sun" />
-      <div className="art-room">
-        <div className="art-wall art-wall-left" />
-        <div className="art-wall art-wall-back" />
-        <div className="art-floor" />
-        <div className="art-window"><i /><i /></div>
-        <div className="art-sofa"><i /><i /></div>
-        <div className="art-table" />
-        <div className="art-plant"><i /><i /><i /></div>
-      </div>
+    <div className={`space-artwork palette-${palette}`} aria-hidden="true">
+      <Box className="art-volume" size={76} strokeWidth={1.05} />
       <div className="art-dots">
         {dots.map(([left, top, size], index) => (
           <i
